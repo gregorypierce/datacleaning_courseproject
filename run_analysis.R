@@ -39,30 +39,32 @@ x.test <- read.table(file.path( filePath, "test", "X_test.txt"))
 x <- rbind( x.train, x.test ) 
 
 # Extract only the measurements on the mean and standard deviation for each measurement. 
-features <- read.table('./UCI HAR Dataset/features.txt')
+features <- read.table( file.path(filePath, '', 'features.txt') )
 mean.sd <- grep("-mean\\(\\)|-std\\(\\)", features[, 2])
 x.mean.sd <- x[, mean.sd]
 
 # Uses descriptive activity names to name the activities in the data set
 names(x.mean.sd) <- features[mean.sd, 2]
-names(x.mean.sd) <- tolower(names(x.mean.sd)) 
+names(x.mean.sd) <- names(x.mean.sd) 
 names(x.mean.sd) <- gsub("\\(|\\)", "", names(x.mean.sd))
 
 activities <- read.table(file.path( filePath,'', 'activity_labels.txt'))
-activities[, 2] <- tolower(as.character(activities[, 2]))
+activities[, 2] <- as.character(activities[, 2])
 activities[, 2] <- gsub("_", "", activities[, 2])
 
 y[, 1] = activities[y[, 1], 2]
 colnames(y) <- 'activity'
 colnames(subject) <- 'subject'
 
-# Appropriately labels the data set with descriptive activity names.
+## Appropriately labels the data set with descriptive activity names.
 data <- cbind(subject, x.mean.sd, y)
-str(data)
+
+## Write out the merged data set
 write.table(data, paste0(projectPath, '/merged.txt'), row.names = F)
 
-# Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
+## Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
 average.df <- aggregate(x=data, by=list(activities=data$activity, subject=data$subject), FUN=mean)
-average.df <- average.df[, !(colnames(average.df) %in% c("subj", "activity"))]
-str(average.df)
+average.df <- average.df[, !(colnames(average.df) %in% c("subject", "activity"))]
+
+## Write out the tidy dataset
 write.table(average.df, paste0(projectPath,'/tidy.txt'), row.names = F)
